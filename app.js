@@ -46,7 +46,7 @@ var getFormatedMoney = function(unit, price) {
     return unit + Math.floor(price / 100) + "." + dec;
 }
 
-var app = angular.module("app", ['ngAnimate']);
+var app = angular.module("app", []);
 
 app.controller("BodyController", ['$scope', function($scope) {
     $scope.finished = false;
