@@ -8,41 +8,90 @@
 	<script src="bower_components\bootstrap\dist\js\bootstrap.min.js" charset="utf-8"></script>
 	<link rel="stylesheet" href="bower_components\bootstrap\dist\css\bootstrap.min.css">
 	<!-- <link rel="stylesheet" href="bower_components\bootstrap\dist\css\bootstrap-theme.min.css"> -->
+	<link rel="stylesheet" href="bower_components\bootstrap-sortable\Contents\bootstrap-sortable.css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="style.css" charset="utf-8">
 </head>
 
 <body ng-controller="BodyController">
-	Hello {{world}}
-	<div class="form" style="width: 50%; margin:auto;">
+	<div class="alert alert-warning resize" role="alert">
+		<div>
+			<h3>About</h3>
+			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque blanditiis, animi recusandae doloribus at, ipsa aut alias quod illo vero commodi, harum eveniet quia nobis voluptate. Nesciunt delectus laborum soluta.</p>
+		</div>
+		<div ng-hide="finished">
+			<hr/>
+			<h3>How to Use</h3>
+			<p>
+				To use this app first you either put your steam64id, steam url, or steamurl ending <i>http://steamcommunity.com/id/<strong>CustomUrl</strong></i>.
+				<br/> Once you have something to identify your steam user, you should make sure you profile is set to public.
+				<br/> After you have completed that you can simply press
+				<button class="btn btn-default btn-xs" onclick="$('#submit').trigger('click');" name="submit" value="Calculate">Calculate</button>
+			</p>
+			<p>
+				Once we have enough information to tell you your game inventories value we will show you it's worth in USD along with a table of all your games which can be sorted by price, playtime, name, or appid.
+			</p>
+		</div>
+	</div>
+	<div class="form resize">
 		<div class="form-group">
 			<div class="input-group">
 				<label for="steam64id">Steam 64 ID</label>
 				<!-- <span class="input-group-addon" id="steamidaddon">@</span> -->
-				<input type="text" class="form-control" id="steam64id" name="steamid" value="76561198055540752" placeholder="Steam64ID" aria-describedby="steamidaddon">
+				<input type="text" ng-model="steamid" class="form-control" id="steamid" name="steamid" value="76561198055540752" placeholder="Steam64ID" aria-describedby="steamidaddon">
+				<input type="hidden" ng-bind="steamid" name="steam64id"></input>
 			</div>
 		</div>
 		<div class="form-group">
-			<input type="submit" class="btn btn-default" id="submit" name="submit" value="Calculate">
+			<button class="btn btn-default" id="submit" name="submit" value="Calculate">Calculate</button>
 		</div>
 	</div>
-	<div ng-show="finished">
-		<h1>Total</h1>
-		<h3>{{total | currency:"$"}}</h3>
+	<div ng-show="started && !finished" class="loading">
+		<svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+			<circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+		</svg>
 	</div>
-	<div ng-show="finished">
-		<table id="gameslist">
-			<tr>
-				<th>ID</th>
-				<th>Game</th>
-				<th>Value</th>
-			</tr>
-			<tr ngRepeat="(i, game) in games">
-				<td>i</td>
-				<td>game.name</td>
-				<td>game.data.price_data.initial</td>
-			</tr>
+	<div ng-show="failed && !finished" class="alert alert-danger resize" role="alert">
+		<h3>Failed to load your user data</h3>
+		<p>
+			This could mean a lot of things, but here are a few you can check.
+		</p>
+		<ul>
+			<li>Make sure you typed your steam URL or ID in correctly</li>
+			<li>The URL or SteamID match the ones on your profile</li>
+			<li>Your profile is set to public</li>
+		</ul>
+	</div>
+	<div ng-show="finished" class="alert alert-info resize" role="alert">
+		<h3>Total</h3>
+		<h3 style="display:inline;">{{total | currency:"$"}}</h3> with an average of
+		<h3 style="display:inline;">{{average | currency:"$"}}</h3>
+	</div>
+	<div ng-show="finished" class="resize">
+		<table id="gameslist" class="table table-striped table-hover sortable">
+			<thead>
+				<tr>
+					<th data-disablesort="true"></th>
+					<th>ID</th>
+					<th>Name</th>
+					<th>PlayTime</th>
+					<th id="tablepriceheader">Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="(i, game) in games" class="{{game.price_overview.initial == 0 ? 'success' : (game.playtime_forever > (1000*60) ? 'info' : '')}}">
+					<td style="padding:0px 10px;"><img class="gameimg" src="https://steamcdn-a.akamaihd.net/steam/apps/{{game.appid}}/header.jpg" alt="" width="79.16" height="37"></td>
+					<td>{{game.appid}}</td>
+					<td>{{game.name}}</td>
+					<td data-value="{{game.playtime_forever}}">{{formatNumber(game.playtime_forever / 60)}} {{game.playtime_forever == 1 ? 'Hour' : 'Hours'}}</td>
+					<td>{{(game.price_overview.initial/100) | currency:"$"}}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
+	<script src="bower_components\moment\min\moment.min.js" charset="utf-8"></script>
+	<script src="bower_components\bootstrap-sortable\Scripts\bootstrap-sortable.js" charset="utf-8"></script>
 	<script src="bower_components\angular\angular.min.js" charset="utf-8"></script>
+	<script src="bower_components\angular-animate\angular-animate.min.js" charset="utf-8"></script>
 	<script src="app.js" charset="utf-8"></script>
 </body>
 
